@@ -40,7 +40,7 @@ try:
 	target_mac  = GetMAC(target_address, request_timeout)
 	gateway_mac = GetMAC(gateway_address, request_timeout)
 
-	print(f"[*] Disguising as {target_address} for {attack_length} second(s) and an abandon packet interval of {request_timeout} second(s)")
+	print(f"[*] Temporarily disguising as {target_address} for {attack_length} second(s) and an abandon packet interval of {request_timeout} second(s)")
 
 	counter = 0
 	while counter < attack_length:
