@@ -22,6 +22,6 @@ netsh INTERFACE_NAME ipv6 set global forwarding=enabled
 ```
 
 ## Usage
-This program is a great tool for capturing packets and harvesting sensitive information (*hypothetically*) without the knowledge of the target. I **DO NOT** condone the malicious use of this software as it should only be used with explicit concent from the target.
 
 ![Credential Stealing](https://i.imgur.com/U3zjBuZ.png)
+This program is a great tool for capturing packets and harvesting sensitive information (*hypothetically*) without the knowledge of the target. I **DO NOT** condone the malicious use of this software as it should only be used with explicit concent from the target.
