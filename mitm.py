@@ -69,9 +69,9 @@ def GetGateway(interface):
 			return line.split(":")[-1].strip()
 	PrintMessage("Failed to resolve default gateway, please use -g.", -1)
 
-def GetMAC(destination):
+def GetMAC(destination, timeout, interface):
 	arp_request = ARP(pdst=destination)
-	response = sr1(arp_request, iface=INTERFACE, timeout=TIMEOUT, verbose=False)
+	response = sr1(arp_request, iface=interface, timeout=timeout, verbose=False)
 
 	if response:
 		return response.hwsrc
@@ -150,8 +150,8 @@ try:
 		functional_parameters["Gateway"] = GetGateway(functional_parameters["Interface"])
 
 	attacker_mac  = get_if_hwaddr(functional_parameters["Interface"])
-	target_mac    = GetMAC(functional_parameters["Target"])
-	gateway_mac   = GetMAC(functional_parameters["Gateway"])
+	target_mac    = GetMAC(functional_parameters["Target"], functional_parameters["Timeout"], functional_parameters["Interface"])
+	gateway_mac   = GetMAC(functional_parameters["Gateway"], functional_parameters["Timeout"], functional_parameters["Interface"])
 
 	PrintMessage(f"(Attacker) {attacker_mac} (Target) {target_mac} (Gateway) {gateway_mac}", 1)
 
