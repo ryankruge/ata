@@ -6,7 +6,7 @@ ATA is a penetration tool for simple usage within a command-line environment. Th
 - I L D P - Network interface, attack duration, packet timeout, packet send interval.
 - V VV - Verbose, more verbose.
 ## Requirements
-This program requires the `scapy` and `colorama` libraries which can be installed via the command-line.
+This program requires the `scapy` and `colorama` libraries which can be installed via the command-line. You must also install the `npcap` drivers for your system in order to for this application and its dependancies to function correctly.
 ```
 python -m pip install scapy
 ```
