@@ -9,11 +9,11 @@ A simple tool for packet interception.
 
 [Required]:
 {colorama.Style.DIM}[{colorama.Style.RESET_ALL}-t{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the target for the attack.
+{colorama.Style.DIM}[{colorama.Style.RESET_ALL}-i{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the desired network interface.
+{colorama.Style.DIM}[{colorama.Style.RESET_ALL}-g{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the gateway of your network.
 
 [Optional]:
 {colorama.Style.DIM}[{colorama.Style.RESET_ALL}-s{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the origin of the attack.
-{colorama.Style.DIM}[{colorama.Style.RESET_ALL}-g{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the gateway of your network.
-{colorama.Style.DIM}[{colorama.Style.RESET_ALL}-i{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the desired network interface.
 {colorama.Style.DIM}[{colorama.Style.RESET_ALL}-l{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the length of the attack.
 {colorama.Style.DIM}[{colorama.Style.RESET_ALL}-d{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the packet drop interval.
 {colorama.Style.DIM}[{colorama.Style.RESET_ALL}-p{colorama.Style.DIM}]{colorama.Style.RESET_ALL} Define the interval of each packet.
