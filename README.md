@@ -13,12 +13,12 @@ python -m pip install scapy
 ```
 python -m pip install colorama
 ```
-Due to the way this program works, for packets to be routed to and from the target correctly you must enable routing on your network interface. To accomplish this in **Windows**, you must enter the following command into the terminal.
+Due to the way this program works, for packets to be routed to and from the target correctly you must enable routing on your network interface. To accomplish this in **Windows**, you must enter the following command into PowerShell. Firstly list all of the available interfaces, then enable the setting.
 ```
-netsh INTERFACE_NAME ipv4 set global forwarding=enabled
+Get-NetIPInterface | select ifIndex,InterfaceAlias,AddressFamily,ConnectionState,Forwarding | Sort-Object -Property IfIndex | Format-Table
 ```
 ```
-netsh INTERFACE_NAME ipv6 set global forwarding=enabled
+Set-NetIPInterface -ifindex INDEX_NUMBER -Forwarding Enabled
 ```
 
 ## Usage
