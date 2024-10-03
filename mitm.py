@@ -13,11 +13,6 @@ DEFAULT_INTERVAL  = 0.1
 DEFAULT_VERBOSE   = False
 DEFAULT_VERBOSER  = False
 
-def CheckFields(fields):
-	for field in fields:
-		if not field: return False
-	return True
-
 try:
 	# Check that all the requirements are met before any computations.
 	CheckFlags(REQUIRED_FLAGS, sys.argv)
