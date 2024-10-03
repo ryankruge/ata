@@ -84,7 +84,8 @@ try:
 	counter = 0
 	while counter < functional_parameters["Duration"]:
 		# In event of infinite loop, break after pre-configured final limit.
-		if counter == DURATION_LIMIT: break
+		if counter == DURATION_LIMIT:
+			break
 
 		counter += 1
 		time.sleep(1)

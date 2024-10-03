@@ -13,7 +13,7 @@ python -m pip install scapy
 ```
 python -m pip install colorama
 ```
-Due to the way this program works, for packets to be routed to and from the target correctly you must enable routing on your network interface. To accomplish this in **Windows**, you must enter the following command into PowerShell. Firstly list all of the available interfaces, then enable the setting.
+Due to the way this program works, for packets to be routed to and from the target correctly you must enable routing on your network interface. To accomplish this in **Windows**, you must enter the following command into **PowerShell**. Firstly list all of the available interfaces, then enable the setting.
 ```
 Get-NetIPInterface | select ifIndex,InterfaceAlias,AddressFamily,ConnectionState,Forwarding | Sort-Object -Property IfIndex | Format-Table
 ```

