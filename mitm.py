@@ -14,7 +14,8 @@ DEFAULT_VERBOSE   = False
 
 try:
 	# Check that all the requirements are met before any computations.
-	CheckFlags(REQUIRED_FLAGS, sys.argv)
+	if not ValidateFlags(REQUIRED_FLAGS, sys.argv):
+		PrintHelp()
 
 	# Configure all of the fields to their default values.
 	functional_parameters = {
@@ -34,7 +35,7 @@ try:
 	address_fields = [
 		functional_parameters["Attacker"],
 		functional_parameters["Target"],
-		functional_parameters["Gateway"],
+		functional_parameters["Gateway"]
 	]
 
 	if not CheckFields(address_fields):
@@ -53,7 +54,7 @@ try:
 	]
 
 	if not CheckFields(mac_fields):
-		PrintMessage("There was an error whilst attempting to acquire the designated physical addresses.")
+		PrintMessage("There was an error whilst attempting to acquire the designated physical addresses.", -1)
 
 	# Establish multi-threading behaviours for efficient network traversal for each incoming and outgoing packet.
 	spoof_thread = threading.Thread(target=Spoof, args=(

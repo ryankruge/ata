@@ -1,5 +1,5 @@
-from scapy.all import ARP, Ether, sr1, send, sniff, IP, get_if_hwaddr
 import colorama, time, sys, subprocess, threading
+from scapy.all import *
 
 HELP_MESSAGE = f"""
 ATA ({colorama.Fore.RED}Man-In-The-Middle{colorama.Fore.WHITE}):
@@ -26,11 +26,14 @@ def CheckFields(fields):
 		if not field: return False
 	return True
 
-def CheckFlags(required, arguments):
-	if '-h' in arguments: PrintHelp()
+def ValidateFlags(required, arguments):
+	if '-h' in arguments:
+		return False
 
 	for flag in required:
-		if flag not in arguments: PrintHelp()
+		if flag not in arguments:
+			return False
+	return True
 
 def PopulateFields(parameters):
 	for argument in range(0, len(sys.argv)):
@@ -73,6 +76,7 @@ def GetMAC(destination, timeout):
 	response = sr1(arp_request, timeout=timeout, verbose=False)
 
 	if response:
+		PrintMessage(f"({destination} : {response.hwsrc})", 0)
 		return response.hwsrc
 	return None
 
